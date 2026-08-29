@@ -1,0 +1,39 @@
+{
+  "channels": [
+    "tecnofferte",
+    "salvatore_aranzulla_offerte",
+    "erroridiprezzo",
+    "cianfrusaglie",
+    "tempodisconti"
+  ],
+  "geminiModel": "gemini-flash-lite-latest",
+  "scanIntervalSeconds": 90,
+  "botPollSeconds": 25,
+  "stateCommitMinutes": 10,
+  "durationSeconds": 21000,
+  "maxNewItemsPerScan": 30,
+  "geminiBatchSize": 8,
+  "seenPruneDays": 3,
+  "defaultCategories": ["tecnologia", "casa", "console_videogiochi"],
+  "defaultThreshold": "clamorosi",
+  "ownerChatId": "1329102270",
+  "categoryLabels": {
+    "tecnologia": "💻 Tecnologia",
+    "casa": "🏠 Casa",
+    "console_videogiochi": "🎮 Console e videogiochi",
+    "altro": "📦 Altro"
+  },
+  "categoryDescriptions": {
+    "tecnologia": "Informatica, elettronica, PC e componenti, smartphone e accessori telefonia, audio (cuffie/speaker), TV, fotografia, domotica, smartwatch/wearable, networking, accessori PC, stampanti, power bank, SSD/hard disk",
+    "casa": "Elettrodomestici grandi e piccoli, cucina e pentole, aspirapolvere e pulizia, arredamento, giardino e fai-da-te, illuminazione, casalinghi, brico, materassi",
+    "console_videogiochi": "Console (PlayStation, Xbox, Nintendo, Steam Deck), videogiochi fisici e digitali, controller e accessori gaming, sedie e scrivanie gaming, visori VR",
+    "altro": "Tutto il resto non coperto sopra: moda e abbigliamento, bellezza e cura della persona, alimentari e bevande, sport e outdoor, giocattoli, libri, prodotti per animali, salute e parafarmacia, auto e moto, ufficio e cancelleria"
+  },
+  "thresholds": {
+    "clamorosi": "Solo veri errori di prezzo o sconti enormi.",
+    "tutto": "Ogni offerta valida nelle categorie scelte."
+  },
+  "tuttoMinDiscount": 25,
+  "clamorosoMinDiscount": 50,
+  "hugeErrorDiscount": 70
+}

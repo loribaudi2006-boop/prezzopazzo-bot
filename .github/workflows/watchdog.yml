@@ -1,0 +1,36 @@
+name: Watchdog
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch: {}
+  workflow_run:
+    workflows: ["PrezzoPazzo Bot"]
+    types: [completed]
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: prezzopazzo-watchdog
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Controlla stato bot, avvisa e riavvia se serve
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DEFAULT_BRANCH: main
+          BOT_WORKFLOW: bot.yml
+          GAP_MINUTES: ${{ github.event_name == 'workflow_run' && '0' || '20' }}
+        run: node watchdog.js

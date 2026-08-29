@@ -1,0 +1,14 @@
+{
+  "name": "prezzopazzo-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Bot Telegram che segnala errori di prezzo e maxi-sconti Amazon.it letti dalle anteprime pubbliche di canali Telegram, filtrati e riassunti con Gemini.",
+  "type": "commonjs",
+  "scripts": {
+    "bot": "node bot_loop.js",
+    "scan": "node scan_loop.js",
+    "scan:once": "node scan_loop.js --once",
+    "watchdog": "node watchdog.js"
+  },
+  "engines": { "node": ">=20" }
+}
