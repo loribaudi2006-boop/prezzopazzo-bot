@@ -9,5 +9,16 @@
     "paused": false,
     "createdAt": "2026-08-29T16:04:47.892Z",
     "_greeted": true
+  },
+  "5002661332": {
+    "categories": [
+      "tecnologia",
+      "casa",
+      "console_videogiochi"
+    ],
+    "threshold": "clamorosi",
+    "paused": false,
+    "createdAt": "2026-08-29T22:49:50.852Z",
+    "_greeted": true
   }
 }
