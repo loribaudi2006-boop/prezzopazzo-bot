@@ -55,15 +55,16 @@ function parseJson(txt) {
 const CATS = ['tecnologia', 'casa', 'console_videogiochi', 'altro'];
 
 async function analyzeDeals(items, cfg) {
-  // items: [{ idx, channelTitle, text, url (amazon pulito) }]
+  // items: [{ idx, channelTitle, asin, text, url (amazon pulito) }]
   const catDesc = Object.entries(cfg.categoryDescriptions).map(([k, v]) => `- ${k}: ${v}`).join('\n');
   const list = items.map((it) => `### ITEM ${it.idx}
 Canale: ${it.channelTitle}
-Link Amazon: ${it.url || '(nessuno)'}
-Testo:
+ASIN: ${it.asin || '(sconosciuto)'}
+Link: ${it.url || '(nessuno)'}
+Testo (riguarda SOLO questo prodotto):
 ${(it.text || '').slice(0, 900)}`).join('\n\n');
 
-  const prompt = `Sei un analista di offerte Amazon.it. Per ogni ITEM qui sotto restituisci un oggetto JSON.
+  const prompt = `Sei un analista di offerte Amazon.it. Ogni ITEM qui sotto è UN SINGOLO prodotto (identificato dall'ASIN). Restituisci un oggetto JSON per ogni ITEM, descrivendo ESATTAMENTE quel prodotto — non inventare, non confondere prodotti diversi.
 
 Categorie disponibili:
 ${catDesc}
@@ -75,13 +76,13 @@ Livelli di gravità (severity):
 - "errore_clamoroso": prezzo palesemente sbagliato / assurdo per quel tipo di prodotto (sconto >70%, oppure prezzo irrisorio rispetto al valore reale). Usalo solo quando è davvero eclatante.
 
 Regole:
-- "title": riformula in italiano corretto e conciso (max 14 parole) dicendo COS'È davvero il prodotto (dispositivo? accessorio? confezione multipla? gioco?). Niente maiuscolo urlato, niente keyword spam.
-- Prezzi: estrai currentPrice e originalPrice come numeri in euro (usa il punto decimale). Se un valore non c'è, null.
+- "title": riformula in italiano corretto e conciso (max 14 parole) dicendo COS'È davvero QUESTO prodotto (dispositivo? accessorio? confezione multipla? gioco?). Niente maiuscolo urlato, niente keyword spam.
+- Prezzi: estrai currentPrice e originalPrice come numeri in euro (punto decimale). Se un valore non c'è, null.
 - discountPct: intero 0-100. Se non calcolabile, null.
-- "isProduct": false se il messaggio non è un vero singolo prodotto acquistabile (es. sondaggio, pubblicità del canale, codice sconto generico, lista troppo confusa). Se il messaggio contiene più prodotti, scegli quello con lo sconto maggiore e descrivi quello.
+- "isProduct": false solo se l'ITEM non è un vero prodotto acquistabile (sondaggio, pubblicità del canale, testo troppo confuso).
 - "reason": una frase breve sul perché è interessante o perché sembra un errore.
 
-Rispondi SOLO con un array JSON, un oggetto per ITEM, in questo formato:
+Rispondi SOLO con un array JSON, un oggetto per ITEM:
 [{"idx": <numero ITEM>, "isProduct": true, "category": "tecnologia", "title": "...", "currentPrice": 12.99, "originalPrice": 49.99, "discountPct": 74, "severity": "errore_clamoroso", "reason": "..."}]
 
 ITEMS:

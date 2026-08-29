@@ -48,6 +48,53 @@ async function fetchChannel(handle, { timeoutMs = 15000 } = {}) {
   }
 }
 
+const ASIN_IN_TEXT = /(?:\/dp\/|\/gp\/product\/|\bASIN[:\s]*)([A-Z0-9]{10})\b/g;
+
+function asinsInText(s) {
+  const out = [];
+  let m;
+  ASIN_IN_TEXT.lastIndex = 0;
+  while ((m = ASIN_IN_TEXT.exec(s))) out.push(m[1].toUpperCase());
+  return out;
+}
+
+// Divide il testo di un messaggio nei singoli prodotti.
+// - 1 solo asin  -> 1 candidato con tutto il testo e la foto del post.
+// - piu' asin    -> 1 candidato per asin, testo = il suo paragrafo,
+//                   NIENTE foto (la foto del post è di un solo prodotto: meglio
+//                   nessuna foto che quella sbagliata).
+function splitProducts(text, asins, postImage) {
+  const uniq = [...new Set(asins)];
+  if (uniq.length <= 1) {
+    return [{ asin: uniq[0] || null, text: text || '', image: pickBodyImage(text, postImage) }];
+  }
+  const segments = (text || '').split(/\n\s*\n+/).map((s) => s.trim()).filter(Boolean);
+  const buckets = [];
+  let current = null;
+  for (const seg of segments) {
+    const found = asinsInText(seg);
+    if (found.length) {
+      current = { asin: found[0], text: seg, image: pickBodyImage(seg, null) };
+      buckets.push(current);
+    } else if (current) {
+      current.text = `${current.text}\n\n${seg}`.trim();
+    }
+  }
+  // asin visti nei link ma non agganciati a un paragrafo: candidato minimale
+  for (const a of uniq) {
+    if (!buckets.some((b) => b.asin === a)) buckets.push({ asin: a, text: text || '', image: null });
+  }
+  return buckets;
+}
+
+function pickBodyImage(scopeText, fallback) {
+  if (scopeText) {
+    const m = scopeText.match(/https?:\/\/[a-z0-9.-]*media-amazon\.com\/images\/I\/[A-Za-z0-9_.+-]+\.(?:jpg|jpeg|png)/i);
+    if (m) return m[0];
+  }
+  return fallback || null;
+}
+
 function parseChannel(handle, html) {
   const titleM = html.match(/<meta property="og:title" content="([^"]*)"/);
   const channelTitle = titleM ? decodeEntities(titleM[1]) : handle;
@@ -88,7 +135,12 @@ function parseChannel(handle, html) {
       if (amzImg) image = amzImg[0].replace(/&amp;/g, '&');
     }
 
-    if (!text && !asins.length) continue;
+    if (!asins.length) continue;
+
+    // Un messaggio può contenere più prodotti: separali in "candidati", ognuno
+    // col SUO asin e col SUO pezzo di testo, così titolo/prezzo/link/foto
+    // restano sempre coerenti tra loro.
+    const products = splitProducts(text, asins, image);
 
     out.push({
       key: postId,
@@ -101,6 +153,7 @@ function parseChannel(handle, html) {
       asins,
       firstAsin: asins[0] || null,
       image,
+      products,
       url: `https://t.me/${postId}`,
     });
   }
