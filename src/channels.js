@@ -76,10 +76,17 @@ function parseChannel(handle, html) {
     }
     const asins = [...new Set(amazonUrls.map(extractAsin).filter(Boolean))];
 
-    // immagine prodotto (utile ma non usata per l'invio)
-    const imgM = b.match(/background-image:\s*url\('([^']+media-amazon[^']+)'\)/)
-      || b.match(/<i class="tgme_widget_message_photo_wrap"[^>]*style="[^"]*url\('([^']+)'\)/);
-    const image = imgM ? imgM[1].replace(/&amp;/g, '&') : null;
+    // immagine prodotto: 1) foto allegata al post (CDN Telegram), 2) fallback
+    // sull'immagine Amazon linkata nel corpo del messaggio.
+    let image = null;
+    const photoM = b.match(/tgme_widget_message_photo_wrap[^"]*"[^>]*?background-image:url\('([^']+)'\)/);
+    if (photoM && !/tgme_widget_message_video/.test(b.slice(0, photoM.index))) {
+      image = photoM[1].replace(/&amp;/g, '&');
+    }
+    if (!image) {
+      const amzImg = b.match(/https?:\/\/[a-z0-9.-]*media-amazon\.com\/images\/I\/[A-Za-z0-9_.+-]+\.(?:jpg|jpeg|png)/i);
+      if (amzImg) image = amzImg[0].replace(/&amp;/g, '&');
+    }
 
     if (!text && !asins.length) continue;
 

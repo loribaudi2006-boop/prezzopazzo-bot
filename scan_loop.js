@@ -89,9 +89,9 @@ async function runOnce() {
     const text = buildMessage(deal, meta);
     for (const [chatId, sub] of subEntries) {
       if (!shouldNotify(deal, sub, cfg)) continue;
-      if (DRY) { console.log(`  → [DRY] invierei a ${chatId}`); sent++; continue; }
+      if (DRY) { console.log(`  → [DRY] invierei a ${chatId}${msg.image ? ' (con foto)' : ''}`); sent++; continue; }
       try {
-        await tg.sendMessage(chatId, text, { silent: isSilent(deal) });
+        await tg.sendDeal(chatId, text, msg.image, { silent: isSilent(deal) });
         sent++;
         await new Promise((r) => setTimeout(r, 350));
       } catch (e) {
